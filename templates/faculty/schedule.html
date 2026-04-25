@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule - Faculty Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+     <style>
+        :root {
+            --primary: #4F46E5;
+            --accent: #3B82F6;
+            --bg: #ffffff;
+            --text: #1f2937;
+            --card-bg: #f9fafb;
+            --sidebar-bg: rgba(255, 255, 255, 0.98);
+            --sidebar-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-bg: rgba(79, 70, 229, 0.08);
+            --active-bg: rgba(79, 70, 229, 0.12);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #f3f4f6 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sidebar {
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--sidebar-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 280px;
+            position: fixed;
+            height: calc(100vh - 2rem);
+            top: 1rem;
+            left: 1rem;
+            z-index: 50;
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: linear-gradient(to right, rgba(79, 70, 229, 0.05), transparent);
+            flex-shrink: 0;
+        }
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .sidebar-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0.75rem;
+            margin: 0.25rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--hover-bg), transparent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar-item:hover::before {
+            opacity: 1;
+        }
+        .sidebar-item:hover {
+            transform: translateX(5px);
+        }
+        .sidebar-item.active {
+            background: var(--active-bg);
+            color: var(--primary);
+        }
+        .sidebar-item.active::after {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            border-radius: 0 4px 4px 0;
+        }
+        .submenu-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0.75rem;
+            margin: 0.25rem 0;
+            padding-left: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .submenu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--hover-bg), transparent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .submenu-item:hover::before {
+            opacity: 1;
+        }
+        .submenu-item:hover {
+            transform: translateX(3px);
+        }
+        .submenu-item.active {
+            color: var(--primary);
+            background: var(--active-bg);
+        }
+        .notification-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            min-width: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1), transparent);
+            margin: 1rem;
+        }
+        .main-content {
+            margin-left: 300px;
+            padding: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mobile-menu-button {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 60;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+        .mobile-menu-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Day Tabs */
+        .day-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .day-tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+        }
+        .day-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .day-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .day-tab.today {
+            position: relative;
+        }
+        .day-tab.today::after {
+            content: 'Today';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10b981;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        
+        /* Schedule Card */
+        .schedule-item {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border-left: 4px solid var(--primary);
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .schedule-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .schedule-item.current {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05), white);
+        }
+        .schedule-item.past {
+            opacity: 0.6;
+            border-left-color: #9ca3af;
+        }
+        
+        /* Time Badge */
+        .time-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .time-badge.current {
+            background: linear-gradient(135deg, #10b981, #059669);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Status Indicator */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.live {
+            background: #10b981;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 1rem;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                margin: 0;
+                border-radius: 0;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .mobile-menu-button {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuButton" class="mobile-menu-button">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="flex items-center space-x-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="w-12 h-12 object-contain">
+                <div class="text-2xl font-bold gradient-text">Faculty Portal</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/faculty/dashboard" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <span class="ml-3">Dashboard</span>
+            </a>
+            <a href="/faculty/profile" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <span class="ml-3">Profile</span>
+            </a>
+            <a href="/faculty/subjects" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <span class="ml-3">My Subjects</span>
+            </a>
+            <a href="/faculty/students" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>
+                <span class="ml-3">Students</span>
+            </a>
+            <a href="/faculty/attendance" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                <span class="ml-3">Attendance</span>
+            </a>
+            <a href="/faculty/schedule" class="sidebar-item active flex items-center p-3 text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span class="ml-3">Schedule</span>
+            </a>
+            <div class="menu-divider"></div>
+            <a href="/faculty/events" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span class="ml-3">Events</span>
+            </a>
+            <a href="/faculty/manage-announcements" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                <span class="ml-3">Announcements</span>
+            </a>
+            <a href="/faculty/settings" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span class="ml-3">Settings</span>
+            </a>
+            <a href="/" class="sidebar-item flex items-center p-3 text-gray-600 hover:text-red-600 mt-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                <span class="ml-3">Logout</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header with Real-time Clock -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">My Teaching Schedule</h1>
+                <p class="text-gray-500 mt-1" id="currentDateDisplay">Loading...</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="glass-card py-2 px-4">
+                    <div class="flex items-center gap-2">
+                        <span class="status-dot live"></span>
+                        <span class="text-sm font-medium" id="currentTime">--:--</span>
+                    </div>
+                </div>
+                <button onclick="openAddScheduleModal()" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition duration-150 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Class
+                </button>
+            </div>
+        </div>
+
+        <!-- Day Tabs -->
+        <div class="mb-6">
+            <div class="day-tabs" id="dayTabs">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+
+        <!-- Today's Summary Card -->
+        <div class="glass-card p-6 rounded-xl mb-6">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Today's Overview</h3>
+                    <p class="text-sm text-gray-500" id="lectureCount">0 lectures</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold text-indigo-600" id="totalLectures">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Total</p>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold text-green-600" id="completedLectures">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Completed</p>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold text-blue-600" id="upcomingLectures">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Upcoming</p>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-sm font-medium text-purple-600" id="currentLecture">-</p>
+                    <p class="text-xs text-gray-500 mt-1">Current Class</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule List -->
+        <div class="glass-card p-6 rounded-xl">
+            <h2 class="text-xl font-semibold mb-4 gradient-text">Classes for <span id="selectedDayName">Today</span></h2>
+            
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p class="text-gray-500 mt-2">Loading schedule...</p>
+            </div>
+            
+            <!-- Schedule Items -->
+            <div id="scheduleList" class="hidden space-y-4">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden empty-state">
+                <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-600 mb-2">No classes scheduled</h3>
+                <p class="text-gray-500" id="emptyMessage">You have no classes on this day</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Schedule Modal -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold gradient-text" id="modalTitle">Add Class Schedule</h2>
+                <button onclick="closeScheduleModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="scheduleForm">
+                <input type="hidden" id="timetableId" />
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                    <select id="subjectSelect" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="">Select subject...</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Day of Week</label>
+                    <select id="dayOfWeek" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                        <input type="time" id="startTime" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                        <input type="time" id="endTime" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Room/Location</label>
+                    <input type="text" id="roomLocation" placeholder="e.g., Room 301, Lab 2" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Class Type</label>
+                    <select id="classType" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="Lecture">Lecture</option>
+                        <option value="Lab">Lab/Practical</option>
+                        <option value="Tutorial">Tutorial</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:shadow-lg transition">
+                        Save Schedule
+                    </button>
+                    <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let scheduleData = {}; // Will store schedule indexed by day number
+        let currentDay = new Date().getDay();
+        let facultySubjects = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu functionality
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const sidebar = document.querySelector('.sidebar');
+
+            mobileMenuButton.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            });
+
+            // Initialize
+            updateClock();
+            setInterval(updateClock, 1000);
+            updateDateDisplay();
+            renderDayTabs();
+            loadFacultySubjects();
+            loadSchedule();
+            
+            // Form submission
+            document.getElementById('scheduleForm').addEventListener('submit', handleScheduleSubmit);
+        });
+
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+
+        // Update date display
+        function updateDateDisplay() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('en-US', options);
+            document.getElementById('currentDateDisplay').textContent = dateStr;
+        }
+
+        // Render day tabs
+        function renderDayTabs() {
+            const container = document.getElementById('dayTabs');
+            const orderedDays = [1, 2, 3, 4, 5, 6]; // Monday to Saturday
+            const today = new Date().getDay();
+            
+            container.innerHTML = orderedDays.map(dayIndex => {
+                const isToday = dayIndex === today;
+                const isActive = dayIndex === currentDay;
+                return `
+                    <button class="day-tab ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}" 
+                            onclick="selectDay(${dayIndex})">
+                        ${days[dayIndex]}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Select day
+        function selectDay(dayIndex) {
+            currentDay = dayIndex;
+            renderDayTabs();
+            displaySchedule(dayIndex);
+            document.getElementById('selectedDayName').textContent = days[dayIndex];
+        }
+
+        // Load faculty subjects for dropdown
+        async function loadFacultySubjects() {
+            try {
+                const token = localStorage.getItem('faculty_token');
+                const response = await fetch('/api/faculty/subjects', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    facultySubjects = data.subjects || [];
+                    populateSubjectDropdown();
+                }
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+            }
+        }
+
+        // Populate subject dropdown
+        function populateSubjectDropdown() {
+            const select = document.getElementById('subjectSelect');
+            select.innerHTML = '<option value="">Select subject...</option>' +
+                facultySubjects.map(subject => 
+                    `<option value="${subject.subject_id}">${subject.subject_code} - ${subject.subject_name}</option>`
+                ).join('');
+        }
+
+        // Load schedule from backend
+        async function loadSchedule() {
+            try {
+                const token = localStorage.getItem('faculty_token');
+                const response = await fetch('/api/faculty/timetable', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    processScheduleData(data.timetable || []);
+                    displaySchedule(currentDay);
+                    updateTodaySummary();
+                } else {
+                    showEmptyState('Unable to load schedule');
+                }
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+                showEmptyState('Failed to load schedule. Please try again.');
+            }
+        }
+
+        // Process schedule data into day-indexed structure
+        function processScheduleData(timetable) {
+            scheduleData = {
+                0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []
+            };
+
+            const dayMap = {
+                'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+                'Thursday': 4, 'Friday': 5, 'Saturday': 6
+            };
+
+            timetable.forEach(entry => {
+                const dayIndex = dayMap[entry.day_of_week];
+                if (dayIndex !== undefined) {
+                    scheduleData[dayIndex].push(entry);
+                }
+            });
+
+            // Sort by start time
+            Object.keys(scheduleData).forEach(day => {
+                scheduleData[day].sort((a, b) => a.start_time.localeCompare(b.start_time));
+            });
+        }
+
+        // Display schedule for selected day
+        function displaySchedule(dayIndex) {
+            const daySchedule = scheduleData[dayIndex] || [];
+            
+            document.getElementById('loadingState').classList.add('hidden');
+            
+            if (daySchedule.length === 0) {
+                document.getElementById('scheduleList').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('emptyMessage').textContent = `No classes scheduled for ${days[dayIndex]}`;
+                return;
+            }
+
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('scheduleList').classList.remove('hidden');
+
+            const now = new Date();
+            const currentTimeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            const isToday = dayIndex === now.getDay();
+
+            document.getElementById('scheduleList').innerHTML = daySchedule.map((item, index) => {
+                let statusClass = '';
+                let statusBadge = '';
+
+                if (isToday) {
+                    if (currentTimeStr >= item.start_time && currentTimeStr < item.end_time) {
+                        statusClass = 'current';
+                        statusBadge = '<span class="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">Live Now</span>';
+                    } else if (currentTimeStr >= item.end_time) {
+                        statusClass = 'past';
+                        statusBadge = '<span class="ml-2 px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-medium">Completed</span>';
+                    } else {
+                        statusBadge = '<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Upcoming</span>';
+                    }
+                }
+
+                const colors = ['indigo', 'blue', 'purple', 'pink', 'teal'];
+                const color = colors[index % colors.length];
+
+                return `
+                    <div class="schedule-item ${statusClass}">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex items-start gap-4 flex-1">
+                                <div class="time-badge ${statusClass === 'current' ? 'current' : ''}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    ${formatTime(item.start_time)} - ${formatTime(item.end_time)}
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-${color}-100 text-${color}-700 text-xs font-semibold rounded">${item.subject_code || 'N/A'}</span>
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">${item.class_type || 'Lecture'}</span>
+                                        ${statusBadge}
+                                    </div>
+                                    <h4 class="font-semibold text-gray-800 mt-2">${item.subject_name || 'Unknown Subject'}</h4>
+                                    <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            ${item.room || 'TBA'}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                            </svg>
+                                            ${item.enrollment_count || 0} students
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editSchedule(${item.timetable_id})" class="px-3 py-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button onclick="deleteSchedule(${item.timetable_id})" class="px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg transition text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('lectureCount').textContent = `${daySchedule.length} lecture${daySchedule.length !== 1 ? 's' : ''}`;
+        }
+
+        // Format time
+        function formatTime(time24) {
+            const [hours, minutes] = time24.split(':');
+            const h = parseInt(hours);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:${minutes} ${ampm}`;
+        }
+
+        // Update today's summary
+        function updateTodaySummary() {
+            const today = new Date().getDay();
+            const todaySchedule = scheduleData[today] || [];
+            
+            const now = new Date();
+            const currentTimeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            let completed = 0;
+            let upcoming = 0;
+            let currentClass = '-';
+            
+            todaySchedule.forEach(item => {
+                if (currentTimeStr >= item.end_time) {
+                    completed++;
+                } else if (currentTimeStr >= item.start_time && currentTimeStr < item.end_time) {
+                    currentClass = item.subject_code || item.subject_name;
+                } else {
+                    upcoming++;
+                }
+            });
+            
+            document.getElementById('totalLectures').textContent = todaySchedule.length;
+            document.getElementById('completedLectures').textContent = completed;
+            document.getElementById('upcomingLectures').textContent = upcoming;
+            document.getElementById('currentLecture').textContent = currentClass;
+        }
+
+        // Show empty state
+        function showEmptyState(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('scheduleList').classList.add('hidden');
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('emptyMessage').textContent = message;
+        }
+
+        // Modal functions
+        function openAddScheduleModal() {
+            document.getElementById('modalTitle').textContent = 'Add Class Schedule';
+            document.getElementById('scheduleForm').reset();
+            document.getElementById('timetableId').value = '';
+            document.getElementById('scheduleModal').classList.add('active');
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
+
+        // Edit schedule
+        async function editSchedule(timetableId) {
+            const token = localStorage.getItem('faculty_token');
+            try {
+                const response = await fetch(`/api/faculty/timetable/${timetableId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const entry = data.entry;
+                    
+                    document.getElementById('modalTitle').textContent = 'Edit Class Schedule';
+                    document.getElementById('timetableId').value = entry.timetable_id;
+                    document.getElementById('subjectSelect').value = entry.subject_id;
+                    document.getElementById('dayOfWeek').value = entry.day_of_week;
+                    document.getElementById('startTime').value = entry.start_time;
+                    document.getElementById('endTime').value = entry.end_time;
+                    document.getElementById('roomLocation').value = entry.room || '';
+                    document.getElementById('classType').value = entry.class_type || 'Lecture';
+                    
+                    document.getElementById('scheduleModal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error loading schedule entry:', error);
+                alert('Failed to load schedule entry');
+            }
+        }
+
+        // Delete schedule
+        async function deleteSchedule(timetableId) {
+            if (!confirm('Are you sure you want to delete this class?')) return;
+
+            const token = localStorage.getItem('faculty_token');
+            try {
+                const response = await fetch(`/api/faculty/timetable/${timetableId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    alert('Schedule deleted successfully');
+                    loadSchedule();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to delete schedule');
+                }
+            } catch (error) {
+                console.error('Error deleting schedule:', error);
+                alert('Failed to delete schedule');
+            }
+        }
+
+        // Handle form submission
+        async function handleScheduleSubmit(e) {
+            e.preventDefault();
+
+            const timetableId = document.getElementById('timetableId').value;
+            const formData = {
+                subject_id: document.getElementById('subjectSelect').value,
+                day_of_week: document.getElementById('dayOfWeek').value,
+                start_time: document.getElementById('startTime').value,
+                end_time: document.getElementById('endTime').value,
+                room: document.getElementById('roomLocation').value,
+                class_type: document.getElementById('classType').value
+            };
+
+            const token = localStorage.getItem('faculty_token');
+            const url = timetableId ? `/api/faculty/timetable/${timetableId}` : '/api/faculty/timetable';
+            const method = timetableId ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert(timetableId ? 'Schedule updated successfully' : 'Schedule added successfully');
+                    closeScheduleModal();
+                    loadSchedule();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to save schedule');
+                }
+            } catch (error) {
+                console.error('Error saving schedule:', error);
+                alert('Failed to save schedule');
+            }
+        }
+
+        // Close modal on outside click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeScheduleModal();
+            }
+        });
+    </script>
+</body>
+</html>
